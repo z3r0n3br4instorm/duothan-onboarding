@@ -1,10 +1,12 @@
 {
   "functions": {
     "app/api/register-team/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/health/route.ts": {
       "maxDuration": 10
     }
   },
-  "env": {
-    "MONGODB_URI": "@mongodb_uri"
-  }
+  "regions": ["iad1"],
+  "buildCommand": "npm run build"
 }
