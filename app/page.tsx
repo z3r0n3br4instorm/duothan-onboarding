@@ -56,7 +56,9 @@ const isValidEmail = (email: string): boolean => {
 
 export default function DuothanRegistration() {
   const [showWelcome, setShowWelcome] = useState(true)
+  const [showQuestionSelector, setShowQuestionSelector] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
+  const [selectedQuestionType, setSelectedQuestionType] = useState<number | null>(null)
   const [teamData, setTeamData] = useState<TeamData>({
     teamName: "",
     teamEmail: "",
@@ -87,15 +89,26 @@ export default function DuothanRegistration() {
     setIsSubmitted(false)
   }, [currentStep])
 
-  const steps = ["Quantum Computing", "Machine Learning", "Lorenz Attractor", "Team Registration"]
+  const getSteps = () => {
+    if (selectedQuestionType === 0) return ["Basic Quantum Computing", "Team Registration"];
+    if (selectedQuestionType === 1) return ["Machine Learning Challenge", "Team Registration"];
+    if (selectedQuestionType === 2) return ["Lorenz Attractor Simulation", "Team Registration"];
+    return ["Unknown", "Team Registration"];
+  }
+  
+  const steps = getSteps()
 
   const questions = {
     0: {
       title: "Basic Quantum Computing",
       icon: <Cpu className="w-8 h-8" />,
       content: [
+        "## Question set 1",
+        "",
+        "> Both questions are mandatory and the upload shuld be in .ipynb format",
+        "",
         "1. Create a quantum toffoli (CCNOT) gate and generate a diagram of it. Use qiskit library for this purpose. Upload the Generated image and the code for review. *ONLY USE FOLLOWING GATES*:",
-        "   • Hadamard H",
+        "   • Hadamard (H)",
         "   • Controlled Not (CX)",
         "   • π/8 (T)",
         "   • T Dagger",
@@ -107,32 +120,25 @@ export default function DuothanRegistration() {
       title: "Machine Learning Challenge",
       icon: <Activity className="w-8 h-8" />,
       content: [
-        "1. Implement a neural network from scratch (without using high-level frameworks like TensorFlow or PyTorch) to classify handwritten digits from the MNIST dataset.",
+        "## Question 2",
         "",
-        "Requirements:",
-        "   • Use only NumPy for mathematical operations",
-        "   • Implement backpropagation algorithm",
-        "   • Achieve at least 85% accuracy on test set",
-        "   • Include training loss and accuracy plots",
+        "> Uploaded file should be in .ipynb format",
         "",
-        "2. Submit your complete code, training plots, and a brief explanation of your implementation approach.",
+        "1. Create a multi-layer perceptron Network with 784 input neurons and 10 output neurons for handwriting recognition. Use MNIST dataset for training and testing. Submit the code for review with the accuracy score that you achieved!",
       ],
     },
     2: {
-      title: "Lorenz Attractor Visualization",
+      title: "Lorenz Attractor Simulation",
       icon: <Code className="w-8 h-8" />,
       content: [
-        "1. Create an interactive 3D visualization of the Lorenz Attractor system using Python.",
+        "## Question 3",
         "",
-        "Requirements:",
-        "   • Solve the Lorenz differential equations numerically",
-        "   • Create an animated 3D plot showing the trajectory",
-        "   • Allow users to modify parameters (σ, ρ, β) interactively",
-        "   • Include phase space analysis",
+        "> Your code should generate the 2D image as well...",
         "",
-        "2. Bonus: Add bifurcation diagram analysis for varying ρ values",
+        "1. Create a simulation of the Lorenz Attractor using any language. The simulation should be able to generate the following depiction of the attractor. Use 2D representation instead of 3D and take horizontal axis as X and vertical axis as Z.",
         "",
-        "Submit your code, visualization outputs, and analysis documentation.",
+        "The output should be similar to this image:",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Lorenz_attractor_yb.svg/330px-Lorenz_attractor_yb.svg.png",
       ],
     },
   }
@@ -149,60 +155,29 @@ export default function DuothanRegistration() {
       <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
         {/* Main Title */}
         <div className="mb-16">
-          <h1 className="text-4xl font-bold mt-4 mb-2 bg-gradient-to-r from-white via-[#e30f53] to-white bg-clip-text text-transparent">
-            DUOTHAN 5.0
-          </h1>
-          <p className="text-2xl text-gray-300 mb-8">
-            Onboarding
+          <div className="flex flex-col justify-center mb-2">
+            <img src="/duo_5.svg" alt="DUOTHAN 5.0" className="h-16" />
+            <p className="text-sm text-gray-300 mb-3">
+            Powered by IEEE NSBM
           </p>
+          </div>
+          {/* <p className="text-2xl text-gray-300 mb-8">
+            [-Onboarding-]
+          </p> */}
         </div>
 
-        {/* Challenge Preview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 p-8 transition-all duration-500 hover:bg-opacity-10 hover:scale-105">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-[#e30f53] bg-opacity-20 flex items-center justify-center">
-                <Cpu className="w-8 h-8 text-[#e30f53]" />
-              </div>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-4">Quantum Computing</h3>
-            {/* <p className="text-gray-300 text-sm leading-relaxed">
-              Dive into quantum algorithms and create quantum gates using Qiskit. Build Toffoli gates and implement Deutsch's algorithm.
-            </p> */}
-          </div>
-
-          <div className="bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 p-8 transition-all duration-500 hover:bg-opacity-10 hover:scale-105">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-[#e30f53] bg-opacity-20 flex items-center justify-center">
-                <Activity className="w-8 h-8 text-[#e30f53]" />
-              </div>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-4">Machine Learning</h3>
-            {/* <p className="text-gray-300 text-sm leading-relaxed">
-              Build neural networks from scratch using only NumPy. Implement backpropagation and achieve high accuracy on MNIST.
-            </p> */}
-          </div>
-
-          <div className="bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 p-8 transition-all duration-500 hover:bg-opacity-10 hover:scale-105">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-[#e30f53] bg-opacity-20 flex items-center justify-center">
-                <Code className="w-8 h-8 text-[#e30f53]" />
-              </div>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-4">Simulations</h3>
-            {/* <p className="text-gray-300 text-sm leading-relaxed">
-              Create stunning 3D visualizations of chaotic systems. Build interactive plots and analyze phase space dynamics.
-            </p> */}
-          </div>
-        </div>
+        
 
         {/* Call to Action */}
         <div>
           <Button 
-            onClick={() => setShowWelcome(false)}
+            onClick={() => {
+              setShowWelcome(false)
+              setShowQuestionSelector(true)
+            }}
             className="bg-[#e30f53] hover:bg-[#b50c43] active:bg-white active:text-[#e30f53] text-white px-12 py-4 text-lg font-semibold transition-all duration-200 shadow-lg"
           >
-            Begin Challenge
+            Initialize Onbording Sequance
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
         </div>
@@ -302,7 +277,18 @@ export default function DuothanRegistration() {
     const files = event.dataTransfer.files
     if (files) {
       const newFiles = Array.from(files)
-      setUploadedFiles(prev => [...prev, ...newFiles])
+      
+      // Filter files based on question type
+      const filteredFiles = selectedQuestionType === 2 
+        ? newFiles // Accept any file type for Question 3 (Lorenz Attractor)
+        : newFiles.filter(file => file.name.toLowerCase().endsWith('.ipynb')) // Only .ipynb for other questions
+      
+      if (filteredFiles.length < newFiles.length && selectedQuestionType !== 2) {
+        setError("Only .ipynb files are accepted for this question")
+        setTimeout(() => setError(""), 3000)
+      }
+      
+      setUploadedFiles(prev => [...prev, ...filteredFiles])
     }
   }
 
@@ -327,15 +313,15 @@ export default function DuothanRegistration() {
     setError("")
     setSuccess("")
 
-    // For question steps (0-2), validate files and explanation
-    if (currentStep < 3 && (uploadedFiles.length === 0 || !explanation.trim())) {
+    // For question step (0), validate files and explanation
+    if (currentStep === 0 && (uploadedFiles.length === 0 || !explanation.trim())) {
       setError("Please upload code files and provide an explanation")
       setLoading(false)
       return
     }
 
-    // For team registration step (3), validate team data
-    if (currentStep === 3 && (!teamData.teamName || !teamData.teamEmail)) {
+    // For team registration step (1), validate team data
+    if (currentStep === 1 && (!teamData.teamName || !teamData.teamEmail)) {
       setError("Please fill in team name and email")
       setLoading(false)
       return
@@ -344,11 +330,11 @@ export default function DuothanRegistration() {
     try {
       let submissionData
       
-      if (currentStep < 3) {
-        // For question steps, save the submission locally and move to next step
+      if (currentStep === 0 && selectedQuestionType !== null) {
+        // For question step, save the submission locally and move to next step
         submissionData = {
-          step: currentStep,
-          questionTitle: questions[currentStep as keyof typeof questions].title,
+          questionType: selectedQuestionType,
+          questionTitle: questions[selectedQuestionType as keyof typeof questions].title,
           files: uploadedFiles.map(file => ({
             name: file.name,
             size: file.size,
@@ -388,7 +374,9 @@ export default function DuothanRegistration() {
           setTimeout(() => {
             setShowCompletionPopup(false)
             setShowWelcome(true)
+            setShowQuestionSelector(false)
             setCurrentStep(0)
+            setSelectedQuestionType(null)
             // Reset all form data
             setTeamData({
               teamName: "",
@@ -418,8 +406,101 @@ export default function DuothanRegistration() {
     }
   }
 
+  // Question Selection Screen Component
+  const QuestionSelectionScreen = () => (
+    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
+      {/* Background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#e30f53] opacity-20 rounded-full mix-blend-multiply filter blur-xl"></div>
+        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-[#e30f53] opacity-10 rounded-full mix-blend-multiply filter blur-xl"></div>
+        <div className="absolute bottom-1/4 left-1/2 w-80 h-80 bg-white opacity-5 rounded-full mix-blend-multiply filter blur-xl"></div>
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
+        {/* Main Title */}
+        <div className="mb-12">
+          <h1 className="text-3xl font-bold mb-4 text-white">
+            Select a Challenge
+          </h1>
+          <p className="text-gray-300 mb-8">
+            Choose one challenge to work on:
+          </p>
+        </div>
+
+        {/* Challenge Selection Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 max-w-4xl mx-auto">
+          <div 
+            onClick={() => {
+              setSelectedQuestionType(0)
+              setShowQuestionSelector(false)
+            }}
+            className="bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 p-8 transition-all duration-500 hover:bg-opacity-10 hover:scale-105 cursor-pointer"
+          >
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-[#e30f53] bg-opacity-20 flex items-center justify-center">
+                <Cpu className="w-8 h-8 text-[#e30f53]" />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Quantum Computing</h3>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Design a quantum CCNOT (Toffoli) gate using only Hadamard, CX, T and T Dagger gates, and implement the Deutsch algorithm using the Qiskit library.
+            </p>
+          </div>
+
+          <div 
+            onClick={() => {
+              setSelectedQuestionType(1)
+              setShowQuestionSelector(false)
+            }}
+            className="bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 p-8 transition-all duration-500 hover:bg-opacity-10 hover:scale-105 cursor-pointer"
+          >
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-[#e30f53] bg-opacity-20 flex items-center justify-center">
+                <Activity className="w-8 h-8 text-[#e30f53]" />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Machine Learning</h3>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Create a multi-layer perceptron network with 784 input neurons and 10 output neurons for handwriting recognition using the MNIST dataset.
+            </p>
+          </div>
+
+          <div 
+            onClick={() => {
+              setSelectedQuestionType(2)
+              setShowQuestionSelector(false)
+            }}
+            className="bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 p-8 transition-all duration-500 hover:bg-opacity-10 hover:scale-105 cursor-pointer"
+          >
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-[#e30f53] bg-opacity-20 flex items-center justify-center">
+                <Code className="w-8 h-8 text-[#e30f53]" />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Lorenz Attractor Simulation</h3>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Create a 2D simulation of the Lorenz Attractor chaotic system using any language, mapping the X and Z coordinates to visualize the famous butterfly pattern.
+            </p>
+          </div>
+        </div>
+
+        <Button 
+          onClick={() => setShowWelcome(true)}
+          className="bg-transparent border border-[#e30f53] text-[#e30f53] hover:bg-[#e30f53] hover:text-white px-8 py-2 font-medium transition-all duration-200"
+        >
+          Back to Home
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Determine which screen to show
   if (showWelcome) {
     return <WelcomeScreen />
+  }
+  
+  if (showQuestionSelector) {
+    return <QuestionSelectionScreen />
   }
 
   return (
@@ -461,23 +542,88 @@ export default function DuothanRegistration() {
         </div>
 
         {/* Question Content */}
-        {currentStep < 3 && (
+        {currentStep === 0 && selectedQuestionType !== null && (
           <div className="bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 p-8 mb-0">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-[#e30f53] bg-opacity-20 flex items-center justify-center mr-4">
-                {questions[currentStep as keyof typeof questions].icon}
+            <div className="flex items-center mb-8 pb-4 border-b border-gray-700">
+              <div className="w-14 h-14 bg-[#e30f53] bg-opacity-20 flex items-center justify-center mr-5 rounded-md shadow-lg">
+                {questions[selectedQuestionType as keyof typeof questions].icon}
               </div>
-              <h2 className="text-2xl font-bold text-white">
-                {questions[currentStep as keyof typeof questions].title}
+              <h2 className="text-3xl font-bold text-white">
+                {questions[selectedQuestionType as keyof typeof questions].title}
               </h2>
             </div>
             
             <div className="space-y-4 text-gray-300 leading-relaxed">
-              {questions[currentStep as keyof typeof questions].content.map((line, index) => (
-                <p key={index} className={line.startsWith("   ") ? "ml-6 text-[#e30f53]" : ""}>
-                  {line}
-                </p>
-              ))}
+              {questions[selectedQuestionType as keyof typeof questions].content.map((line, index) => {
+                // Style headers (## Heading)
+                if (line.startsWith('##')) {
+                  return (
+                    <div key={index} className="my-5">
+                      <h3 className="text-2xl font-bold text-white inline-block relative">
+                        {line.replace('##', '')}
+                        <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#e30f53]"></div>
+                      </h3>
+                    </div>
+                  );
+                }
+                // Style quotes/callouts (> text)
+                else if (line.startsWith('>')) {
+                  return (
+                    <div key={index} className="my-5 rounded-md overflow-hidden shadow-md">
+                      <div className="bg-[#e30f53] px-4 py-1.5 text-sm font-medium text-white">
+                        IMPORTANT
+                      </div>
+                      <div className="bg-[#e30f53] bg-opacity-10 px-4 py-3 border-l-4 border-[#e30f53]">
+                        {line.replace('>', '')}
+                      </div>
+                    </div>
+                  );
+                }
+                // Style bullet points (• text)
+                else if (line.startsWith('   •')) {
+                  return <p key={index} className="ml-6 text-[#e30f53] flex items-center gap-2">
+                    <span className="text-xl">•</span>
+                    <span>{line.replace('   •', '')}</span>
+                  </p>;
+                }
+                // Style numbered list items (1. 2. etc)
+                else if (/^\d+\./.test(line)) {
+                  const [number, ...rest] = line.split('.');
+                  return (
+                    <div key={index} className="flex items-start gap-3 mb-4">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#e30f53] bg-opacity-20 text-[#e30f53] font-bold">
+                        {number}
+                      </span>
+                      <p className="font-medium text-white">
+                        {rest.join('.')}.
+                      </p>
+                    </div>
+                  );
+                }
+                // Style code or emphasized text with asterisks
+                else if (line.includes('*') && !line.startsWith('   •')) {
+                  const parts = line.split(/(\*[^*]+\*)/g);
+                  return (
+                    <p key={index} className="my-1">
+                      {parts.map((part, i) => {
+                        if (part.startsWith('*') && part.endsWith('*')) {
+                          return <span key={i} className="font-semibold text-[#e30f53]">{part.slice(1, -1)}</span>;
+                        }
+                        return <span key={i}>{part}</span>;
+                      })}
+                    </p>
+                  );
+                }
+                // Style URL links and images
+                else if (line.startsWith('http')) {
+                  return <div key={index} className="my-4 flex flex-col items-center">
+                    <img src={line} alt="Example output" className="max-w-full h-auto rounded-md border border-gray-600 shadow-lg" />
+                    <p className="text-xs text-gray-400 mt-2">Example output image</p>
+                  </div>;
+                }
+                // Default styling
+                return <p key={index} className={line.startsWith("   ") ? "ml-6 text-gray-400" : ""}>{line}</p>;
+              })}
             </div>
 
             <div className="mt-8 space-y-4">
@@ -492,7 +638,11 @@ export default function DuothanRegistration() {
                   onClick={() => document.getElementById('file-input')?.click()}
                 >
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-300 mb-2">Drag and drop your code files here</p>
+                  <p className="text-gray-300 mb-2">
+                    {selectedQuestionType === 2 
+                      ? "Drag and drop your code files here (.py, .js, .java, etc.)" 
+                      : "Drag and drop your Jupyter Notebook (.ipynb) file here"}
+                  </p>
                   <Button 
                     variant="outline" 
                     className="border-[#e30f53] text-[#e30f53] hover:bg-[#e30f53] hover:text-white"
@@ -504,7 +654,9 @@ export default function DuothanRegistration() {
                     id="file-input"
                     type="file"
                     multiple
-                    accept=".py,.js,.ts,.jsx,.tsx,.java,.cpp,.c,.cs,.php,.rb,.go,.rs,.swift,.kt,.scala,.html,.css,.sql,.ipynb,.txt,.md"
+                    accept={selectedQuestionType === 2 
+                      ? ".py,.js,.java,.cpp,.c,.ipynb,.jl,.m,.r,.txt" 
+                      : ".ipynb"}
                     onChange={handleFileUpload}
                     className="hidden"
                   />
@@ -550,24 +702,36 @@ export default function DuothanRegistration() {
                 />
               </div>
 
-              <Button 
-                onClick={() => handleSubmit({ step: currentStep })}
-                disabled={loading || uploadedFiles.length === 0 || !explanation.trim() || isSubmitted}
-                className={`w-full py-3 text-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isSubmitted 
-                    ? 'bg-green-600 hover:bg-green-600 text-white' 
-                    : 'bg-[#e30f53] hover:bg-[#b50c43] active:bg-white active:text-[#e30f53] text-white'
-                }`}
-              >
-                {loading ? "Submitting..." : isSubmitted ? "Submitted" : "Submit Solution"}
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
+              <div className="flex gap-4">
+                <Button 
+                  onClick={() => {
+                    setShowQuestionSelector(true);
+                    setCurrentStep(0);
+                    setSelectedQuestionType(null);
+                  }}
+                  className="bg-transparent border border-gray-400 text-gray-300 hover:border-white hover:text-white py-3 text-lg font-semibold transition-all duration-200 flex-1"
+                >
+                  Back to Selection
+                </Button>
+                <Button 
+                  onClick={() => handleSubmit({ step: currentStep })}
+                  disabled={loading || uploadedFiles.length === 0 || !explanation.trim() || isSubmitted}
+                  className={`flex-1 py-3 text-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    isSubmitted 
+                      ? 'bg-green-600 hover:bg-green-600 text-white' 
+                      : 'bg-[#e30f53] hover:bg-[#b50c43] active:bg-white active:text-[#e30f53] text-white'
+                  }`}
+                >
+                  {loading ? "Submitting..." : isSubmitted ? "Submitted" : "Submit Solution"}
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Team Registration */}
-        {currentStep === 3 && (
+        {currentStep === 1 && (
           <div className="bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 p-8">
             <div className="flex items-center mb-8">
               <div className="w-12 h-12 bg-[#e30f53] bg-opacity-20 flex items-center justify-center mr-4">
@@ -734,8 +898,11 @@ export default function DuothanRegistration() {
                 <Trophy className="w-8 h-8 text-green-400" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">Registration Completed!</h3>
+              <div className="flex justify-center my-4">
+                <img src="/duo_5.svg" alt="DUOTHAN 5.0" className="h-8" />
+              </div>
               <p className="text-gray-300 mb-4">
-                Your team has been successfully registered for Duothan 5.0.
+                Your team has been successfully registered.
               </p>
               <p className="text-gray-400 text-sm">
                 Redirecting to home screen...
