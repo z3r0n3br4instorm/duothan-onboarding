@@ -111,7 +111,7 @@ export default function DuothanRegistration() {
         "   • Hadamard (H)",
         "   • Controlled Not (CX)",
         "   • π/8 (T)",
-        "   • T Dagger",
+        "   • T Dagger (tdg)",
         "",
         "2. Implement deutsch algorithm using qiskit library to obtain the balanced measurement. Run the simulation 1024 rounds and submit the code, and the generated graphs for review",
       ],
