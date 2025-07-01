@@ -1,20 +1,32 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { MongoClient } from "mongodb"
+import clientPromise from "@/lib/mongodb"
 
-const MONGODB_URI = process.env.MONGODB_URI
+export async function GET() {
+  try {
+    const client = await clientPromise
+    const db = client.db("duothan")
+    const teamsCollection = db.collection("teams")
 
-if (!MONGODB_URI) {
-  throw new Error("MONGODB_URI environment variable is not defined")
-}
+    const teams = await teamsCollection.find({}).sort({ registrationDate: -1 }).toArray()
 
-let client: MongoClient | null = null
-
-async function connectToDatabase() {
-  if (!client) {
-    client = new MongoClient(MONGODB_URI as string)
-    await client.connect()
+    return NextResponse.json({
+      success: true,
+      count: teams.length,
+      teams: teams.map(team => ({
+        _id: team._id,
+        teamData: {
+          teamName: team.teamData.teamName,
+          teamEmail: team.teamData.teamEmail,
+          memberNames: team.teamData.members.map((member: any) => member.fullName).filter(Boolean)
+        },
+        registrationDate: team.registrationDate,
+        status: team.status
+      }))
+    })
+  } catch (error) {
+    console.error("Error fetching teams:", error)
+    return NextResponse.json({ error: "Failed to fetch teams" }, { status: 500 })
   }
-  return client.db("duothan")
 }
 
 export async function POST(request: NextRequest) {
@@ -43,7 +55,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "At least 2 members must have complete information" }, { status: 400 })
     }
 
-    const db = await connectToDatabase()
+    const client = await clientPromise
+    const db = client.db("duothan")
     const teamsCollection = db.collection("teams")
 
     // Check for duplicate team

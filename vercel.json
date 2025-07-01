@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "app/api/register-team/route.ts": {
+      "maxDuration": 10
+    }
+  },
+  "env": {
+    "MONGODB_URI": "@mongodb_uri"
+  }
+}
