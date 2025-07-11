@@ -222,7 +222,7 @@ export const QuestionSelectionScreen: React.FC<QuestionSelectionScreenProps> = (
         setTimeRemaining(formatTime(newTime));
         
         // If time is up, check and update session status
-        if (newTime <= 0 && teamCode && !sessionData?.isCompleted) {
+        if (newTime <= -3 && teamCode && !sessionData?.isCompleted) {
           // Clear the interval
           clearInterval(timer);
           
