@@ -131,100 +131,96 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       if (validationResult.valid) {
         setIsTeamCodeValid(true);
         
-        // If team is registered, check for existing session
-        if (validationResult.isRegistered) {
-          // First check if there's a submission for this team
-          let hasSubmission = false;
-          try {
-            const submissionResponse = await fetch(`/api/check-submission?teamCode=${teamCode.trim()}`, {
-              method: "GET",
-              headers: { "Content-Type": "application/json" },
-            });
-            
-            const submissionData = await submissionResponse.json();
-            if (submissionData.success && submissionData.hasSubmission) {
-              hasSubmission = true;
+        // Always try to get or create a session as long as the team code is valid
+        // This handles the case where data might be malformed but the team code exists
+        
+        // First check if there's a submission for this team
+        let hasSubmission = false;
+        try {
+          const submissionResponse = await fetch(`/api/check-submission?teamCode=${teamCode.trim()}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          });
+          
+          const submissionData = await submissionResponse.json();
+          if (submissionData.success && submissionData.hasSubmission) {
+            hasSubmission = true;
+          }
+        } catch (submissionErr) {
+          console.error("Error checking submission status:", submissionErr);
+        }
+        
+        const sessionResult = await getOrStartSession(teamCode.trim());
+        
+        if (sessionResult.success && sessionResult.session) {
+          // If there's a submission but session is not marked as completed,
+          // update the session to mark it as completed
+          let updatedSession = sessionResult.session;
+          
+          if (hasSubmission && !sessionResult.session.isCompleted) {
+            try {
+              const updateResponse = await fetch("/api/onboarding-session", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                  teamCode: teamCode.trim(), 
+                  isCompleted: true 
+                }),
+              });
+              
+              const updateData = await updateResponse.json();
+              if (updateData.success && updateData.session) {
+                updatedSession = updateData.session;
+              }
+            } catch (updateErr) {
+              console.error("Error updating session completion status:", updateErr);
             }
-          } catch (submissionErr) {
-            console.error("Error checking submission status:", submissionErr);
           }
           
-          const sessionResult = await getOrStartSession(teamCode.trim());
+          // Set session information
+          // Only consider the session active if it has a question type AND a start time
+          const hasStartTime = updatedSession.startTime !== null;
+          const hasActiveSession = updatedSession.questionType !== null && 
+                                  (hasStartTime && updatedSession.remainingTimeMs > 0);
           
-          if (sessionResult.success && sessionResult.session) {
-            // If there's a submission but session is not marked as completed,
-            // update the session to mark it as completed
-            let updatedSession = sessionResult.session;
-            
-            if (hasSubmission && !sessionResult.session.isCompleted) {
-              try {
-                const updateResponse = await fetch("/api/onboarding-session", {
-                  method: "PUT",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ 
-                    teamCode: teamCode.trim(), 
-                    isCompleted: true 
-                  }),
-                });
-                
-                const updateData = await updateResponse.json();
-                if (updateData.success && updateData.session) {
-                  updatedSession = updateData.session;
-                }
-              } catch (updateErr) {
-                console.error("Error updating session completion status:", updateErr);
-              }
-            }
-            
-            // Set session information
-            // Only consider the session active if it has a question type AND a start time
-            const hasStartTime = updatedSession.startTime !== null;
-            const hasActiveSession = updatedSession.questionType !== null && 
-                                    (hasStartTime && updatedSession.remainingTimeMs > 0);
-            
-            // Mark session as completed if we have a submission
-            const isCompleted = updatedSession.isCompleted || hasSubmission;
-            
-            if (hasActiveSession || isCompleted) {
-              // Store session info for the UI to show options
-              setSessionInfo({
-                hasActiveSession: hasActiveSession && !isCompleted,
-                sessionTimeRemaining: updatedSession.remainingTimeMs || (12 * 60 * 60 * 1000), // Default to 12 hours if not set
-                questionType: updatedSession.questionType,
-                sessionCompleted: isCompleted
-              });
-              // Store the session with updated completion status
-              setSession({
-                ...updatedSession,
-                isCompleted: isCompleted,
-                remainingTimeMs: updatedSession.remainingTimeMs || (12 * 60 * 60 * 1000) // Ensure we have a valid time
-              });
-            } else {
-              // If no active session or completed, show question selection
-              setSession(sessionResult.session);
-              setShowWelcome(false);
-              setShowQuestionSelector(true);
-            }
+          // Mark session as completed if we have a submission
+          const isCompleted = updatedSession.isCompleted || hasSubmission;
+          
+          if (hasActiveSession || isCompleted) {
+            // Store session info for the UI to show options
+            setSessionInfo({
+              hasActiveSession: hasActiveSession && !isCompleted,
+              sessionTimeRemaining: updatedSession.remainingTimeMs || (12 * 60 * 60 * 1000), // Default to 12 hours if not set
+              questionType: updatedSession.questionType,
+              sessionCompleted: isCompleted
+            });
+            // Store the session with updated completion status
+            setSession({
+              ...updatedSession,
+              isCompleted: isCompleted,
+              remainingTimeMs: updatedSession.remainingTimeMs || (12 * 60 * 60 * 1000) // Ensure we have a valid time
+            });
           } else {
-            // No session found, create a new one
-            const newSessionResult = await getOrStartSession(teamCode.trim(), null, true);
-            if (newSessionResult.success && newSessionResult.session) {
-              // Make sure to set a valid remainingTimeMs for new sessions
-              setSession({
-                ...newSessionResult.session,
-                // Ensure new sessions have the full 12 hours available
-                remainingTimeMs: 12 * 60 * 60 * 1000
-              });
-              setShowWelcome(false);
-              setShowQuestionSelector(true);
-            } else {
-              setError(newSessionResult.error || "Failed to start session");
-            }
+            // If no active session or completed, show question selection
+            setSession(sessionResult.session);
+            setShowWelcome(false);
+            setShowQuestionSelector(true);
           }
         } else {
-          // For unregistered teams, proceed to registration
-          setShowWelcome(false);
-          setShowRegistration(true);
+          // No session found, create a new one - this should happen regardless of registration status
+          const newSessionResult = await getOrStartSession(teamCode.trim(), null, true);
+          if (newSessionResult.success && newSessionResult.session) {
+            // Make sure to set a valid remainingTimeMs for new sessions
+            setSession({
+              ...newSessionResult.session,
+              // Ensure new sessions have the full 12 hours available
+              remainingTimeMs: 12 * 60 * 60 * 1000
+            });
+            setShowWelcome(false);
+            setShowQuestionSelector(true);
+          } else {
+            setError(newSessionResult.error || "Failed to start session");
+          }
         }
       } else {
         setError(validationResult.error || "Invalid team code");
